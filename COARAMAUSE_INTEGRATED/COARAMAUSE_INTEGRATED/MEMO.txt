@@ -1,0 +1,551 @@
+
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+siyoungchoi@sys-Mac-mini-103 SDL_mixer % make install
+/bin/sh ./build-scripts//mkinstalldirs /usr/local/include/SDL2
+umask 22
+mkdir /usr/local/include/SDL2
+for src in ./include/SDL_mixer.h; do \
+	    file=`echo $src | sed -e 's|^.*/||'`; \
+	    /usr/bin/install -c -m 644 $src /usr/local/include/SDL2/$file; \
+	done
+/bin/sh ./build-scripts//mkinstalldirs /usr/local/lib/pkgconfig
+/usr/bin/install -c -m 644 SDL2_mixer.pc /usr/local/lib/pkgconfig/
+/bin/sh ./build-scripts//mkinstalldirs /usr/local/lib/cmake/SDL2_mixer/
+umask 22
+mkdir /usr/local/lib/cmake/SDL2_mixer
+/usr/bin/install -c -m 644 sdl2_mixer-config.cmake /usr/local/lib/cmake/SDL2_mixer
+/usr/bin/install -c -m 644 sdl2_mixer-config-version.cmake /usr/local/lib/cmake/SDL2_mixer
+/bin/sh ./build-scripts//mkinstalldirs /usr/local/lib
+/bin/sh ./libtool --mode=install /usr/bin/install -c build/libSDL2_mixer.la /usr/local/lib/libSDL2_mixer.la
+libtool: install: /usr/bin/install -c build/.libs/libSDL2_mixer-2.0.0.dylib /usr/local/lib/libSDL2_mixer-2.0.0.dylib
+libtool: install: (cd /usr/local/lib && { ln -s -f libSDL2_mixer-2.0.0.dylib libSDL2_mixer.dylib || { rm -f libSDL2_mixer.dylib && ln -s libSDL2_mixer-2.0.0.dylib libSDL2_mixer.dylib; }; })
+libtool: install: /usr/bin/install -c build/.libs/libSDL2_mixer.lai /usr/local/lib/libSDL2_mixer.la
+libtool: install: /usr/bin/install -c build/.libs/libSDL2_mixer.a /usr/local/lib/libSDL2_mixer.a
+libtool: install: chmod 644 /usr/local/lib/libSDL2_mixer.a
+libtool: install: ranlib /usr/local/lib/libSDL2_mixer.a
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /usr/local/lib
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the `-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the `DYLD_LIBRARY_PATH' environment variable
+     during execution
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+
+
+
+
+
+
+FFMPEG 
+
+
+1. JAPANESE TUTORIAL
+https://proc-cpuinfo.fixstars.com/2017/08/ffmpeg-api-decode/
+
+
+
+2. OFFICIAL DOXYGEN
+https://www.ffmpeg.org/doxygen/trunk/group__libavf.html
+
+
+
+
+3. HOW TO COMPILE ! (COMPILATION SECTION!)
+https://trac.ffmpeg.org/wiki/CompilationGuide/macOS
+
+
+
+4. CODECS REQUIRED!
+
+H264
+http://www.videolan.org/developers/x264.html
+
+
+fdk-aac
+https://sourceforge.net/projects/opencore-amr/files/fdk-aac/
+
+
+VORBIS
+https://ftp.osuosl.org/pub/xiph/releases/vorbis/
+
+
+OPUS
+https://www.opus-codec.org/downloads/
+
+
+
+MP3 LAME
+https://sourceforge.net/projects/lame/files/lame/
+
+
+
+ASS
+https://github.com/libass/libass
+
+
+
+
+
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+// < DELETE ALL FILE MATCHED !!!! >
+// https://superuser.com/questions/89413/delete-files-recursively-matching-a-name-on-the-command-line-os-x
+find . -name '._*' -type f -delete
+			  ===
+              PATTERN !!
+
+
+
+
+
+
+
+
+
+
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+// < USING nm COMMAND >
+// https://www.ibm.com/docs/en/aix/7.2?topic=n-nm-command
+
+
++
+
+
+
+
+// < SOLVE SYMBOL PATH PROBLEM !!! >
+// https://blog.enjoitech.com/article/216
+// 
+
+
+
+
+dyld: Symbol not found: _libiconv_open
+  Referenced from: /usr/local/rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/i686-darwin10.7.0/iconv.bundle
+  Expected in: flat namespace
+
+Trace/BPT trap
+これは要するに iconv.bundle がリンクしている先の libiconv ライブラリに存在すべきシンボルが無いという旨のエラー。発生する原因は色々あると思うけど、多いのは独自にライブラリを ports や コンパイルなどでインストールして複数存在する場合に起こる事が多いと思う。
+例えば今回の場合は、独自に libiconv を /usr/local にインストールしていたため、 rvm インストール時に使用されたライブラリと、いざ実行したさいにロードしようとしているライブラリが違ってしまっているためエラーが発生する。
+
+解決方法がいくつかあったので、それをメモ。
+
+
+
+
+
+
+
+
+DYLD_LIBRARY_PATH 環境変数で回避
+一番楽で早いのは環境変数で読み込むライブラリの場所を指定してやる方法。
+例えば今回の例で iconv.bundle のリンク先を otool で確認すると
+
+$ otool -L /usr/local/rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/i686-darwin10.7.0/iconv.bundle
+/usr/local/rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/i686-darwin10.7.0/iconv.bundle:
+	/usr/local/rvm/rubies/ruby-1.8.7-p334/lib/libruby.dylib (compatibility version 1.8.0, current version 1.8.7)
+	/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 125.2.10)
+	/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 227.0.0)
+となり、どうやら /usr/lib/libiconv.2.dylib を参照している模様。しかし本当にロードしなければいけないのは、 /usr/local/lib/libiconv.2.dylib なので、環境変数 DYLD_LIBRARY_PATH を以下のように指定するとエラーが回避できる。
+
+$ export DYLD_LIBRARY_PATH=/usr/local/lib
+ただしこの方法、毎回やるのは面倒だし、かと言って .bash_profile などに追加しておくと、他のアプリケーションが起動しなくなったりする。
+なので、もうちょっと直接的な解決方法を考える。
+
+
+
+
+
+
+
+
+
+
+install_name_tool でライブラリ内のリンク情報を置換
+そもそもライブラリ内のリンク情報が間違っているのが問題なのだから、これを書き換えてしまえばいいのではないか？という事で、 install_name_tool を使って書き換えを行う。以下のコマンドを実行する。
+
+$ install_name_tool -change "/usr/lib/libiconv.2.dylib" /usr/local/lib/libiconv.2.dylib /usr/local/rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/i686-darwin10.7.0/iconv.bundle
+そして再び otool で確認すると、
+
+$ otool -L /usr/local/rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/i686-darwin10.7.0/iconv.bundle/usr/local/rvm/rubies/ruby-1.8.7-p334/lib/ruby/1.8/i686-darwin10.7.0/iconv.bundle:
+	/usr/local/rvm/rubies/ruby-1.8.7-p334/lib/libruby.dylib (compatibility version 1.8.0, current version 1.8.7)
+	/usr/local/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 125.2.10)
+	/usr/lib/libobjc.A.dylib (compatibility version 1.0.0, current version 227.0.0)
+書き変わってますね。では rails を再び実行してみる。
+
+$ ./script/server start
+=> Booting WEBrick
+=> Rails 2.3.5 application starting on http://0.0.0.0:3000
+=> Call with -d to detach
+=> Ctrl-C to shutdown server
+[2011-11-21 14:34:00] INFO  WEBrick 1.3.1
+[2011-11-21 14:34:00] INFO  ruby 1.8.7 (2011-02-18) [i686-darwin10.7.0]
+[2011-11-21 14:34:00] INFO  WEBrick::HTTPServer#start: pid=3506 port=3000
+めでたく動きました。
+
+
+
+
+
+
+
+
+
+
+
+
+
+// < ABOUT DUPLICATED SYMBOLS >
+// https://chunminchang.github.io/blog/post/how-to-avoid-duplicate-symbols-when-compiling
+
+
+
+
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+// < PREVENT TO DELETE .S FILE AFTER COMPILATION !!!! >
+// https://stackoverflow.com/questions/15189704/makefile-removes-object-files-for-no-reason
+// USE 
+//
+//
+//
+// .PRECIOUS: $(BUILD_DIR)/%.c.S $(BUILD_DIR)/%.cpp.S $(BUILD_DIR)/%.c.o $(BUILD_DIR)/%.cpp.o
+
+
+
+
+
+
+
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+https://tex2e.github.io/blog/makefile/automatic-variables
+
+
+
+Makefile でよく使う、特別な意味を持つ変数（自動変数）の備忘録です。 具体的には $@, $<, $^, $?, $+, $* と、暗黙ルールで使われる変数（$(CXX), $(RM) など）についてです。
+
+
+
+$@
+ターゲット名。
+
+
+
+変数	説明
+
+$@	ルールのターゲットの名前。$(@) と書いても同じ意味を持つ。
+$(@D)	ルールのターゲットのディレクトリ名。
+$(@F)	ルールのターゲットのファイル名。
+aaa/bbb/foo:
+	@echo $@     # => aaa/bbb/foo
+	@echo $(@D)  # => aaa/bbb
+	@echo $(@F)  # => foo
+$<
+依存関係の一番最初の名前。
+
+変数	説明
+
+$<	依存関係の一番最初の名前。$(<) と書いても同じ意味を持つ。
+$(<D)	依存関係の一番最初のディレクトリ名。
+$(<F)	依存関係の一番最初のファイル名。
+output/foo: input/bar input/baz
+	@echo $<     # => input/bar
+	@echo $(<D)  # => input
+	@echo $(<F)  # => bar
+$^
+ターゲットの全ての依存関係の名前。
+
+変数	説明
+$^	ターゲットの依存関係の名前。$(^) と書いても同じ意味を持つ。
+$(^D)	ターゲットの依存関係のディレクトリ名。
+$(^F)	ターゲットの依存関係のファイル名。
+output/foo: input/bar input/baz
+	@echo $^     # => input/bar input/baz
+	@echo $(^D)  # => input input
+	@echo $(^F)  # => bar baz
+$?
+ターゲットよりタイムスタンプが新しい依存関係の名前。
+
+変数	説明
+$?	ターゲットより新しい全ての依存関係の名前。$(?) と書いても同じ意味を持つ。
+$(?D)	ターゲットより新しい全ての依存関係のディレクトリ名。
+$(?F)	ターゲットより新しい全ての依存関係のファイル名。
+# ファイル foo よりも bar の方がタイムスタンプが新しく、
+# ファイル foo よりも baz の方がタイムスタンプが古い、という状況のとき
+output/foo: input/bar input/baz
+	@echo $?     # => input/bar
+	@echo $(?D)  # => input
+	@echo $(?F)  # => bar
+$+
+ターゲットの全ての依存関係の名前 (重複があっても省略しない)。 一般的には $^ の方がよく使われます。
+
+変数	説明
+$+	重複を含むターゲットの依存関係の名前。$(+) と書いても同じ意味を持つ。
+$(+D)	重複を含むターゲットの依存関係のディレクトリ名。
+$(+F)	重複を含むターゲットの依存関係のファイル名。
+output/foo: input/baz input/baz input/baz
+	@echo $+     # => input/baz input/baz input/baz
+	@echo $(+D)  # => input input input
+	@echo $(+F)  # => baz baz baz
+$*
+ターゲットのパターンマッチに一致した部分。 関連するファイルを作成するときなどに役立つ。
+
+変数	説明
+$*	ターゲットのパターンマッチに一致した部分。$(*) と書いても同じ意味を持つ。
+$(*D)	ターゲットのパターンマッチに一致した部分のディレクトリ名。
+$(*F)	ターゲットのパターンマッチに一致した部分のファイル名。
+# ファイル lib/foo.c があって `make lib/foo.o` をする状況のとき
+%.o: %.c
+	@echo $*     # => lib/foo
+	@echo $(*D)  # => lib
+	@echo $(*F)  # => foo
+
+
+Make の特殊変数
+変数	説明
+$(VPATH)	Directory search path for files not found in the current directory.
+$(SHELL)	The name of the system default command interpreter, usually /bin/sh. You can set SHELL in the makefile to change the shell used to run recipes.
+$(MAKE)	The name with which make was invoked. Using this variable in recipes has special meaning.
+$(MAKELEVEL)	The number of levels of recursion (sub-makes).
+$(MAKEFLAGS)	The flags given to make. You can set this in the environment or a makefile to set flags.
+暗黙ルールで使われている変数
+変数	説明
+$(AR)	Archive-maintaining program; default ‘ar’.
+$(AS)	Program for compiling assembly files; default ‘as’.
+$(CC)	Program for compiling C programs; default ‘cc’.
+$(CXX)	Program for compiling C++ programs; default ‘g++’.
+$(CPP)	Program for running the C preprocessor, with results to standard output; default ‘$(CC) -E’.
+$(FC)	Program for compiling or preprocessing Fortran and Ratfor programs; default ‘f77’.
+$(M2C)	Program to use to compile Modula-2 source code; default ‘m2c’.
+$(PC)	Program for compiling Pascal programs; default ‘pc’.
+$(CO)	Program for extracting a file from RCS; default ‘co’.
+$(GET)	Program for extracting a file from SCCS; default ‘get’.
+$(LEX)	Program to use to turn Lex grammars into source code; default ‘lex’.
+$(YACC)	Program to use to turn Yacc grammars into source code; default ‘yacc’.
+$(LINT)	Program to use to run lint on source code; default ‘lint’.
+$(MAKEINFO)	Program to convert a Texinfo source file into an Info file; default ‘makeinfo’.
+$(TEX)	Program to make TeX DVI files from TeX source; default ‘tex’.
+$(TEXI2DVI)	Program to make TeX DVI files from Texinfo source; default ‘texi2dvi’.
+$(WEAVE)	Program to translate Web into TeX; default ‘weave’.
+$(CWEAVE)	Program to translate C Web into TeX; default ‘cweave’.
+$(TANGLE)	Program to translate Web into Pascal; default ‘tangle’.
+$(CTANGLE)	Program to translate C Web into C; default ‘ctangle’.
+$(RM)	Command to remove a file; default ‘rm -f’.
+追加の引数
+変数	説明
+$(ARFLAGS)	Flags to give the archive-maintaining program; default ‘rv’.
+$(ASFLAGS)	Extra flags to give to the assembler (when explicitly invoked on a ‘.s’ or ‘.S’ file).
+$(CFLAGS)	Extra flags to give to the C compiler.
+$(CXXFLAGS)	Extra flags to give to the C++ compiler.
+$(COFLAGS)	Extra flags to give to the RCS co program.
+$(CPPFLAGS)	Extra flags to give to the C preprocessor and programs that use it (the C and Fortran compilers).
+$(FFLAGS)	Extra flags to give to the Fortran compiler.
+$(GFLAGS)	Extra flags to give to the SCCS get program.
+$(LDFLAGS)	Extra flags to give to compilers when they are supposed to invoke the linker, ‘ld’, such as -L. Libraries (-lfoo) should be added to the LDLIBS variable instead.
+$(LDLIBS)	Library flags or names given to compilers when they are supposed to invoke the linker, ‘ld’. LOADLIBES is a deprecated (but still supported) alternative to LDLIBS. Non-library linker flags, such as -L, should go in the LDFLAGS variable.
+$(LFLAGS)	Extra flags to give to Lex.
+$(YFLAGS)	Extra flags to give to Yacc.
+$(PFLAGS)	Extra flags to give to the Pascal compiler.
+$(RFLAGS)	Extra flags to give to the Fortran compiler for Ratfor programs.
+$(LINTFLAGS)	Extra flags to give to lint.
+
+
+
+
+
+
+
+
+
+
+
+
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+# 8.6.1 Using Linker Symbols in C/C++ Applications
+
+Linker symbols have a name and a value. The value is a 32-bit unsigned integer, even if it represents a pointer value on a target that has pointers smaller than 32 bits.
+
+The most common kind of symbol is generated by the compiler for each function and variable. The value represents the target address where that function or variable is located. When you refer to the symbol by name in the linker command file or in an assembly file, you get that 32-bit integer value.
+
+However, in C and C++ names mean something different. If you have a variable named x that contains the value Y, and you use the name "x" in your C program, you are actually referring to the contents of variable x. If "x" is used on the right-hand side of an expression, the compiler fetches the value Y. To realize this variable, the compiler generates a linker symbol named x with the value &x. Even though the C/C++ variable and the linker symbol have the same name, they don't represent the same thing. In C, x is a variable name with the address &x and content Y. For linker symbols, x is an address, and that address contains the value Y.
+
+Because of this difference, there are some tricks to referring to linker symbols in C code. The basic technique is to cause the compiler to creating a "fake" C variable or function and take its address. The details differ depending on the type of linker symbol.
+
+Linker symbols that represent a function address: In C code, declare the function as an extern function. Then, refer to the value of the linker symbol using the same name. This works because function pointers "decay" to their address value when used without adornment. For example:
+
+extern void _c_int00(void); printf("_c_int00 %lx\n", (unsigned long)&_c_int00);
+Suppose your linker command file defines the following linker symbol:
+
+func_sym=printf+100;
+Your C application can refer to this symbol as follows:
+
+extern void func_sym(void); printf("func_sym %lx\n", _symval(&func_sym)); /* these two are equivalent */ printf("func_sym %lx\n", (unsigned long)&func_sym);
+Linker symbols that represent a data address: In C code, declare the variable as an extern variable. Then, refer to the value of the linker symbol using the & operator. Because the variable is at a valid data address, we know that a data pointer can represent the value.
+
+Suppose your linker command file defines the following linker symbols:
+
+data_sym=.data+100; xyz=12345
+Your C application can refer to these symbols as follows:
+
+extern far char data_sym; extern far int xyz; printf("data_sym %lx\n", _symval(&data_sym)); /* these two are equivalent */ printf("data_sym %p\n", &data_sym); myvar = &xyz;
+Notice that linker symbols for data must be declared in C using the far keyword. This is because the compiler assumes that symbols declared without "far" have addresses relative to the data page register (DP). Using the "far" keyword causes the compiler to treat these as absolute symbols.
+
+Linker symbols for an arbitrary address: In C code, declare this as an extern symbol. The type does not matter. If you are using GCC extensions, declare it as "extern void". If you are not using GCC extensions, declare it as "extern char". Then, refer to the value of the linker symbol mySymbol as _symval(&mySymbol). You must use the _symval operator, which is equivalent to a cast, because the 32-bit value of the linker symbol could be wider than a data pointer. The compiler treats _symval(&mySymbol) in a special way that can represent all 32 bits, even when pointers are 16 bits. Targets that have 32-bit pointers can usually use &mySymbol instead of the _symval operator. However, the portable way to access such linker symbols across TI targets is to use _symval(&mySymbol).
+
+Suppose your linker command file defines the following linker symbol:
+
+abs_sym=0x12345678;
+Your C application can refer to this symbol as follows:
+
+extern char abs_sym; printf("abs_sym %lx\n", _symval(&abs_sym));
+
+
+8.6.1 Using Linker Symbols in C/C++ Applications
+
+
+
+Linker symbols have a name and a value. The value is a 32-bit unsigned integer, even if it represents a pointer value on a target that has pointers smaller than 32 bits.
+
+The most common kind of symbol is generated by the compiler for each function and variable. The value represents the target address where that function or variable is located. When you refer to the symbol by name in the linker command file or in an assembly file, you get that 32-bit integer value.
+
+However, in C and C++ names mean something different. If you have a variable named x that contains the value Y, and you use the name "x" in your C program, you are actually referring to the contents of variable x. If "x" is used on the right-hand side of an expression, the compiler fetches the value Y. To realize this variable, the compiler generates a linker symbol named x with the value &x. Even though the C/C++ variable and the linker symbol have the same name, they don't represent the same thing. In C, x is a variable name with the address &x and content Y. For linker symbols, x is an address, and that address contains the value Y.
+
+Because of this difference, there are some tricks to referring to linker symbols in C code. The basic technique is to cause the compiler to creating a "fake" C variable or function and take its address. The details differ depending on the type of linker symbol.
+
+Linker symbols that represent a function address: In C code, declare the function as an extern function. Then, refer to the value of the linker symbol using the same name. This works because function pointers "decay" to their address value when used without adornment. For example:
+
+extern void _c_int00(void); printf("_c_int00 %lx\n", (unsigned long)&_c_int00);
+Suppose your linker command file defines the following linker symbol:
+
+func_sym=printf+100;
+Your C application can refer to this symbol as follows:
+
+extern void func_sym(void); printf("func_sym %lx\n", _symval(&func_sym)); /* these two are equivalent */ printf("func_sym %lx\n", (unsigned long)&func_sym);
+Linker symbols that represent a data address: In C code, declare the variable as an extern variable. Then, refer to the value of the linker symbol using the & operator. Because the variable is at a valid data address, we know that a data pointer can represent the value.
+
+Suppose your linker command file defines the following linker symbols:
+
+data_sym=.data+100; xyz=12345
+Your C application can refer to these symbols as follows:
+
+extern far char data_sym; extern far int xyz; printf("data_sym %lx\n", _symval(&data_sym)); /* these two are equivalent */ printf("data_sym %p\n", &data_sym); myvar = &xyz;
+Notice that linker symbols for data must be declared in C using the far keyword. This is because the compiler assumes that symbols declared without "far" have addresses relative to the data page register (DP). Using the "far" keyword causes the compiler to treat these as absolute symbols.
+
+Linker symbols for an arbitrary address: In C code, declare this as an extern symbol. The type does not matter. If you are using GCC extensions, declare it as "extern void". If you are not using GCC extensions, declare it as "extern char". Then, refer to the value of the linker symbol mySymbol as _symval(&mySymbol). You must use the _symval operator, which is equivalent to a cast, because the 32-bit value of the linker symbol could be wider than a data pointer. The compiler treats _symval(&mySymbol) in a special way that can represent all 32 bits, even when pointers are 16 bits. Targets that have 32-bit pointers can usually use &mySymbol instead of the _symval operator. However, the portable way to access such linker symbols across TI targets is to use _symval(&mySymbol).
+
+Suppose your linker command file defines the following linker symbol:
+
+abs_sym=0x12345678;
+Your C application can refer to this symbol as follows:
+
+extern char abs_sym; printf("abs_sym %lx\n", _symval(&abs_sym));
+
+
+
+
+
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+
+
+
+
+
+// < INSTALL GLM FROM SOURCE >
+// https://tatsy.github.io/OpenGLCourseJP/setup/glm/
+
+
+
+

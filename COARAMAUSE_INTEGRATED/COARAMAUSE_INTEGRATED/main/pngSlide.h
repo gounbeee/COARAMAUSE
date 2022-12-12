@@ -6,36 +6,18 @@
 	1. Pngle (for png decoding)
 	2. ILI9341 LIBRARY (for LCD control)
 	
+	--------------------------------------------------------------
 	LICENSE :
-	<  >
+	< GNU General Public License >
+	Version 3, 29 June 2007
+	https://www.gnu.org/licenses/gpl-3.0.en.html#mission-statement
 	
 
+	--------------------------------------------------------------
 	ABSTRACT :
 	1. CREATING SLIDE WITH PNG IMAGE
 	2. TIMING CONTROL OF SINGLE FRAME
 	3. NOT CREATING FAST EFFECIENT PLAYBACK FOR MOVIE FILE
-
-
-	NAME CONVENTIONS :
-	1.  CAMEL STYLE (aaBbbbCccc)
-	2.  ALL CAPITAL 							: MACRO || ENUM
-	3.  START WITH CAPITAL && ENDED WITH _t 	: TYPE
-	4.  START WITH CAPITAL && FUNCTION       	: API FUNCTION
-	5.  START WITH !CAPITAL && FUNCTION      	: LOCAL FUNCTION
-	6.  g  										: GLOBAL
-	7.  p  										: POINTER
-	8.  pp 										: POINTER TO POINTER
-	9.  h  										: HANDLER
-	10. 
-
-
-	STUDY NOTES : 
-	1. THERE ARE NOTES & TUTORIAL CODES USING
-	"#if 0" MACROS
-
-
-
-
 
 */
 
@@ -80,8 +62,7 @@
 #define MAX_CHAR_OF_INDEX	5			// RANGE TO 00000 ~ 99999	
 
 
-#define	INTERVAL		400
-#define WAIT	vTaskDelay(INTERVAL)				// SHORTCUT FOR DELAYING RTOS'S TASK
+#define FRAMETIME 			100
 
 #define PAGE_CSV_FILENAME "pg.csv"
 
@@ -225,7 +206,9 @@ int 			getSeperatorCount(char* inputChr, const char* seperator);
 void			getSplitIndex(int* output, int outputSize, char* inputChr, const char* seperator);
 int				getSplittedWordByIndex(char* inputChr, const char* seperator, int seperatorCnt);
 int				getImageGroupIndexFromFile(char* _fileName, char* _seperator);
-
+void 			setupFonts();
+void 			setupSPIDisplay();
+void 			setupFileList();
 
 
 // NOT USING

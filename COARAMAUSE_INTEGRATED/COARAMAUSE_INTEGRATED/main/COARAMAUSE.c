@@ -62,35 +62,6 @@ static void SPIFFS_Directory(char * path) {
 void app_main(void) {
 
 
-	esp_err_t ret_sd;
-
-
-
-	// Use settings defined above to initialize SD card and mount FAT filesystem.
-	// Note: esp_vfs_fat_sdmmc/sdspi_mount is all-in-one convenience functions.
-	// Please check its source code and implement error recovery when developing
-	// production applications.
-	ESP_LOGI(TAG, "Using SPI peripheral");
-
-	sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-	spi_bus_config_t bus_cfg = {
-	    .mosi_io_num = CONFIG_MOSI_GPIO,
-	    //.miso_io_num = CONFIG_MISO_GPIO,
-	    .sclk_io_num = CONFIG_SCLK_GPIO,
-	    .quadwp_io_num = -1,
-	    .quadhd_io_num = -1,
-	    .max_transfer_sz = 4000,
-	};
-
-
-	ret_sd = spi_bus_initialize(host.slot, &bus_cfg, SPI_DMA_CHAN);
-	if (ret_sd != ESP_OK) {
-	    ESP_LOGE(TAG, "Failed to initialize bus.");
-	    return;
-	}
-
-
-
 
 
 	ESP_LOGI(TAG, "Initializing SPIFFS");
@@ -98,7 +69,7 @@ void app_main(void) {
 	esp_vfs_spiffs_conf_t conf = {
 		.base_path = "/spiffs",
 		.partition_label = NULL,
-		.max_files = 16,
+		.max_files = 32,
 		.format_if_mount_failed =true
 	};
 
@@ -136,13 +107,6 @@ void app_main(void) {
     ESP_LOGI(TAG, "-----------------------------");
     ESP_LOGI(TAG, "-----------------------------");
     ESP_LOGI(TAG, "Initializing PNGSLIDE");
-
-
-    //vTaskDelay( 1000 / portTICK_PERIOD_MS);
-
-
-
-
 
 
 

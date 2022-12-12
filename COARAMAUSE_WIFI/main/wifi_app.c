@@ -2043,26 +2043,26 @@ static void wifi_sock_task(void *pvParameters) {
 
 								printf("linkedScenes  TEST  ...    %d  \n", linkedScenes[0]);
 
-									char* serializedData = serializeIntList( linkedScenes, linkedCount);
-									//printf("      serializedData IS ---->       %s   \n", serializedData);
+								char* serializedData = serializeIntList( linkedScenes, linkedCount);
+								//printf("      serializedData IS ---->       %s   \n", serializedData);
 
 
-								    ESP_LOGI(TAG, "DATA WILL BE SENT TO   :  %s  ", g_addr_str);
+							    ESP_LOGI(TAG, "DATA WILL BE SENT TO   :  %s  ", g_addr_str);
 
 
-								    //int written = send(sock, serializedData + (len - to_write), to_write, 0);
-									int written = send( socket_client, serializedData, strlen(serializedData), 0 );
+							    //int written = send(sock, serializedData + (len - to_write), to_write, 0);
+								int written = send( socket_client, serializedData, strlen(serializedData), 0 );
 
-								    if (written < 0) {
-								        ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
-								        
-								    } else {
+							    if (written < 0) {
+							        ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
+							        
+							    } else {
 
-										ESP_LOGI(TAG, "SENT : len: %d", written);
+									ESP_LOGI(TAG, "SENT : len: %d", written);
 
-								    }
+							    }
 
-									ESP_LOGI(TAG, "-- SENDING DATA ENDED --");
+								ESP_LOGI(TAG, "-- SENDING DATA ENDED --");
 
 							} else {
 
@@ -2098,8 +2098,6 @@ static void wifi_sock_task(void *pvParameters) {
 
 				printf("g_sockLoopGate IS CLOSED\n");
 				printf("          SOCKET   i   IS   ->   %d\n", i);
-
-
 
 
 			}
@@ -2318,7 +2316,6 @@ static void wifi_app_task(void *pvParameters) {
 						wifi_app_call_callback();
 
 					}
-
 
 					break;
 
